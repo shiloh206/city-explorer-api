@@ -1,13 +1,13 @@
 'use strict';
 
-console.log('my server');
-
 // **** REQUIRES ****
 
 const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
-let data = require('./data/weather.json');
+const getMovie = require('./modules/movies');
+const getWeather = require('./modules/weather');
+
 
 // **** USE EXPRESS ****
 // **** app === server ****
@@ -31,41 +31,8 @@ app.get('/', (rquest, response) => {
   response.status(200).send('Welcome to my server');
 });
 
-app.get('/hello', (request, response) => {
-  console.log(request.query);
-
-  let firstName = request.query.firstName;
-  let lastName = request.query.lastName;
-  response.status(200).send(`Hello ${firstName} ${lastName}! Welcome to my server`);
-});
-
-app.get('/weather', (request, response, next) => {
-    console.log(request.query)
-  try {
-    let lat = request.query.lat;
-    let lon = request.query.lon;
-    let cityName = request.query.cityName;
-
-    // let url = `https://api.weatherbit.io/v2.0/forecast/daily?key=${process.env.WEATHER_API_KEY}&lat=${lat}&lon${lon}`;
-
-    let city = data.find(city => city.city_name.toLowerCase() === cityName.toLowerCase());
-    let weatherData = city.data.map(dayObj => new Forecast(dayObj));
-
-    console.log(weatherData);
-    response.status(200).send(weatherData);
-  } catch (error) {
-    next(error);
-  }
-});
-
-// **** CLASS TO GROOM BULKY DATA ****
-
-class Forecast {
-  constructor(dayObj){
-    this.date = dayObj.valid_date;
-    this.description = dayObj.weather.description;
-  }
-}
+app.get('/movies', getMovie);
+app.get('/weather', getWeather);
 
 // **** CATCH ALL ENDPOINT
 
@@ -76,7 +43,6 @@ app.get('*', (request, response) => {
 // **** ERROR HANDLING ****
 
 app.use((error, request, response, next) => {
-    console.log('inside of error handler')
   response.status(500).send(error.message);
 });
 
